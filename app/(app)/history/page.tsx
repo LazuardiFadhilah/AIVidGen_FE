@@ -62,6 +62,10 @@ export default function HistoryPage() {
   useEffect(() => { fetchHistory() }, [fetchHistory])
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this script? This action cannot be undone.')) {
+      return
+    }
+    
     setDeletingId(id)
     try {
       await api.delete(`/history/${id}`)
