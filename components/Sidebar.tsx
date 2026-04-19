@@ -132,7 +132,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 flex-col bg-surface-container-low border-r border-outline-variant/10 shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-50">
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 flex-col bg-surface-container-low border-r border-outline-variant/10 shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-50 print:hidden">
         <SidebarContent 
           pathname={pathname} 
           user={user} 
@@ -142,7 +142,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-low/90 backdrop-blur-xl border-b border-outline-variant/10 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-low/90 backdrop-blur-xl border-b border-outline-variant/10 flex items-center justify-between px-4 print:hidden">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center">
             <FiHexagon className="text-on-primary text-sm fill-current" />
@@ -159,7 +159,7 @@ export default function Sidebar() {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-40" onClick={() => setMobileOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-40 print:hidden" onClick={() => setMobileOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <aside className="absolute left-0 top-0 h-full w-72 bg-surface-container-low shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="pt-16">
@@ -175,7 +175,7 @@ export default function Sidebar() {
       )}
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-low/95 backdrop-blur-xl border-t border-outline-variant/10">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-low/95 backdrop-blur-xl border-t border-outline-variant/10 print:hidden">
         <div className="flex items-center justify-around py-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href

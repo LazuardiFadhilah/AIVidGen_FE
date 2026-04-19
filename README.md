@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎬 AIVidGen — Professional AI Video Studio
 
-## Getting Started
+**AIVidGen** adalah platform berbasis AI yang dirancang untuk membantu kreator, marketer, dan edukator menghasilkan naskah video produksi yang lengkap dalam hitungan detik. Platform ini tidak hanya menghasilkan teks, tetapi juga memberikan breakdown per adegan (*scene-by-scene*) yang siap untuk diproduksi.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Fitur Utama
+
+- **🤖 AI-Powered Script Generation**: Algoritma cerdas yang menyesuaikan naskah berdasarkan tipe video, audiens, dan tone suara.
+- **📑 Scene Breakdown**: Setiap naskah dilengkapi dengan arahan visual dan naskah audio per adegan lengkap dengan estimasi durasi.
+- **🔄 Live Editing & Update**: Fitur "Preview & Export" yang memungkinkan Anda menarik kembali naskah dari histori untuk direvisi dan di-generate ulang.
+- **📥 Multi-Format Export**:
+    - **Export as PDF**: Template profesional yang dioptimalkan untuk cetak.
+    - **Export as TXT**: File teks terstruktur yang mencakup detail scene.
+- **🕒 Generation History**: Simpan dan kelola semua proyek naskah Anda di satu tempat.
+- **🎨 Aether Flux Design System**: Antarmuka modern yang futuristik dengan mode gelap (*dark mode*) yang nyaman di mata.
+
+---
+
+## 🚀 Teknologi yang Digunakan
+
+- **Frontend**: [Next.js](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) dengan custom theme "Aether Flux".
+- **Icons**: [React Icons](https://react-icons.github.io/react-icons/) (Feather Icons set).
+- **State Management**: React Hooks (useState, useEffect, useCallback).
+- **Notifications**: [React Hot Toast](https://react-hot-toast.com/).
+- **API Client**: Axios untuk koneksi ke backend AI service.
+
+---
+
+## 🛠️ Instalasi & Persiapan
+
+1. **Clone Repositori**:
+   ```bash
+   git clone https://github.com/username/aividgen-fe.git
+   cd aividgen-fe
+   ```
+
+2. **Install Dependensi**:
+   ```bash
+   npm install
+   ```
+
+3. **Konfigurasi Environment**:
+   Buat file `.env.local` dan tambahkan URL API backend Anda:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   ```
+
+4. **Jalankan Aplikasi**:
+   ```bash
+   npm run dev
+   ```
+   Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
+
+---
+
+## 📐 Arsitektur Folder
+
+```text
+├── app/               # Next.js App Router (Pages & Layouts)
+│   ├── (app)/         # Protected Routes (Dashboard, History)
+│   ├── login/         # Authentication Page
+│   └── register/      # Registration Page
+├── components/        # Reusable UI Components (Sidebar, etc.)
+├── lib/               # Utility functions & API configuration
+├── public/            # Static assets
+└── styles/            # Global styles & Tailwind config
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📝 Alur Kerja Pengguna (User Workflow)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Register/Login**: Masuk menggunakan akun lokal (Database-driven).
+2. **Setup Prompt**: Pilih tipe video (Marketing, Edukasi, dll), masukkan topik, target audiens, dan tone.
+3. **Generate**: AI akan memproses naskah dan menampilkan breakdown scene di layar.
+4. **Manage History**: Akses histori untuk melihat naskah lama.
+5. **Re-edit**: Gunakan tombol "Preview & Export" di histori untuk memodifikasi naskah lama di dashboard.
+6. **Export**: Unduh hasil akhir dalam format PDF yang rapi atau file teks mentah.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🤝 Kontribusi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Kontribusi selalu terbuka! Silakan fork repositori ini dan buat pull request jika ingin menambahkan fitur baru atau memperbaiki bug.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📄 Lisensi
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Proyek ini berada di bawah lisensi MIT.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Designed with ❤️ by [Lazuardi Fadhilah](https://github.com/username)

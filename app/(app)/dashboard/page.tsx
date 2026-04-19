@@ -12,7 +12,8 @@ import {
   FiCheck, 
   FiCopy, 
   FiDownload,
-  FiSave
+  FiSave,
+  FiFileText
 } from 'react-icons/fi'
 
 const VIDEO_TYPES = [
@@ -92,12 +93,10 @@ export default function DashboardPage() {
     try {
       let data;
       if (editingId) {
-        // Mode Edit: Update data yang sudah ada
         const response = await api.put(`/history/${editingId}`, payload)
         data = response.data
         toast.success('Script updated!')
       } else {
-        // Mode Create: Generate baru
         const response = await api.post('/generate', payload)
         data = response.data
         toast.success('Script generated!')
@@ -125,7 +124,6 @@ export default function DashboardPage() {
   const downloadScript = () => {
     if (!result) return
     
-    // Format the content
     let content = `TITLE: ${result.output.title}\n`
     content += `VIDEO TYPE: ${result.videoType.toUpperCase()}\n`
     content += `DURATION: ${result.duration}\n`
@@ -155,11 +153,15 @@ export default function DashboardPage() {
     URL.revokeObjectURL(url)
   }
 
+  const handleExportPDF = () => {
+    window.print()
+  }
+
   return (
     <main className="min-h-screen p-4 sm:p-6 lg:p-8 bg-surface bg-[radial-gradient(ellipse_at_top_right,#131319_0%,transparent_60%)]">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 print:hidden">
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold text-on-surface tracking-[-0.04em] mb-1">
               {editingId ? 'Edit Video Script' : 'Generate Video Script'}
@@ -184,7 +186,7 @@ export default function DashboardPage() {
         </header>
 
         {/* Form Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 print:hidden">
 
           {/* Left: Settings */}
           <div className="lg:col-span-5 space-y-5">
@@ -328,9 +330,9 @@ export default function DashboardPage() {
 
         {/* Result */}
         {result && (
-          <div className="space-y-5 animate-[fade-in_0.4s_ease]">
+          <div className="space-y-5 animate-[fade-in_0.4s_ease] print:p-0">
             {/* Result Header */}
-            <div className="bg-surface-container-low rounded-2xl p-5 border border-primary/20 shadow-ambient">
+            <div className="bg-surface-container-low rounded-2xl p-5 border border-primary/20 shadow-ambient print:shadow-none print:border-outline-variant/30">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -343,7 +345,7 @@ export default function DashboardPage() {
                   </div>
                   <h2 className="text-2xl font-bold text-on-surface tracking-tight">{result.output.title}</h2>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 flex-shrink-0 print:hidden">
                   <button
                     onClick={copyScript}
                     className="bg-surface-container-highest text-on-surface border border-outline-variant/15 rounded-xl py-2 px-3 text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2"
@@ -358,6 +360,13 @@ export default function DashboardPage() {
                     <FiDownload className="text-lg" />
                     <span className="hidden sm:inline">.txt</span>
                   </button>
+                  <button
+                    onClick={handleExportPDF}
+                    className="bg-primary/10 text-primary border border-primary/20 rounded-xl py-2 px-3 text-sm font-medium hover:bg-primary/20 transition-colors flex items-center gap-2"
+                  >
+                    <FiFileText className="text-lg" />
+                    <span className="hidden sm:inline">PDF</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -367,7 +376,7 @@ export default function DashboardPage() {
               {result.output.scenes.map((scene) => (
                 <div
                   key={scene.sceneNumber}
-                  className="bg-surface-container-highest rounded-2xl p-5 border-l-4 border-l-primary border border-outline-variant/15 flex flex-col md:flex-row gap-5"
+                  className="bg-surface-container-highest rounded-2xl p-5 border-l-4 border-l-primary border border-outline-variant/15 flex flex-col md:flex-row gap-5 print:break-inside-avoid print:bg-white/5"
                 >
                   <div className="md:w-1/4 flex-shrink-0">
                     <span className="text-primary font-bold text-sm block mb-1">Scene {String(scene.sceneNumber).padStart(2, '0')}</span>
@@ -378,7 +387,7 @@ export default function DashboardPage() {
                       <h4 className="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Visual</h4>
                       <p className="text-on-surface text-sm leading-relaxed">{scene.visual}</p>
                     </div>
-                    <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10">
+                    <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 print:bg-black/20">
                       <h4 className="text-xs font-bold text-tertiary uppercase tracking-wider mb-1">Audio / Script</h4>
                       <p className="text-on-surface-variant text-sm italic">&ldquo;{scene.script}&rdquo;</p>
                     </div>
@@ -388,21 +397,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Full Script Collapsible */}
-            <div className="bg-surface-container-low rounded-2xl border border-outline-variant/15 overflow-hidden">
+            <div className="bg-surface-container-low rounded-2xl border border-outline-variant/15 overflow-hidden print:border-none">
               <button
                 onClick={() => setScriptOpen(!scriptOpen)}
-                className="w-full flex items-center justify-between p-4 text-on-surface hover:bg-surface-container-highest transition-colors"
+                className="w-full flex items-center justify-between p-4 text-on-surface hover:bg-surface-container-highest transition-colors print:hidden"
               >
                 <span className="font-bold text-sm">View Full Script</span>
                 <FiChevronDown className={`text-on-surface-variant transition-transform ${scriptOpen ? 'rotate-180' : ''}`} />
               </button>
-              {scriptOpen && (
-                <div className="px-4 pb-4">
-                  <pre className="bg-surface-container-lowest rounded-xl p-4 text-on-surface text-sm leading-relaxed whitespace-pre-wrap font-sans border border-outline-variant/10">
-                    {result.output.fullScript}
-                  </pre>
+              <div className={`${scriptOpen ? 'block' : 'hidden'} px-4 pb-4 print:block print:p-0`}>
+                <div className="hidden print:block mb-4 pt-4 border-t border-outline-variant/15">
+                  <h3 className="font-bold text-sm uppercase tracking-widest text-on-surface-variant">Full Script</h3>
                 </div>
-              )}
+                <pre className="bg-surface-container-lowest rounded-xl p-4 text-on-surface text-sm leading-relaxed whitespace-pre-wrap font-sans border border-outline-variant/10 print:bg-transparent print:p-0 print:border-none">
+                  {result.output.fullScript}
+                </pre>
+              </div>
             </div>
           </div>
         )}
