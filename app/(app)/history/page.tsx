@@ -4,7 +4,18 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
-import { FiSearch, FiLoader, FiVideo, FiClock, FiList, FiPlayCircle, FiTrash2 } from 'react-icons/fi'
+import { 
+  FiSearch, 
+  FiLoader, 
+  FiVideo, 
+  FiClock, 
+  FiList, 
+  FiPlayCircle, 
+  FiTrash2, 
+  FiLayers,
+  FiAlertTriangle,
+  FiX
+} from 'react-icons/fi'
 
 interface Scene { sceneNumber: number; timeRange: string; visual: string; script: string }
 interface Generation {
@@ -17,6 +28,14 @@ interface Generation {
   audience?: string
   createdAt: string
   output: { title: string; fullScript: string; scenes: Scene[] }
+}
+
+interface GroupedGeneration {
+  id: string
+  topic: string
+  videoType: string
+  createdAt: string
+  versions: Generation[]
 }
 
 const TYPE_BADGE: Record<string, string> = {
@@ -44,8 +63,11 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [activeVersions, setActiveVersions] = useState<Record<string, number>>({})
+  
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   const fetchHistory = useCallback(async () => {
     setLoading(true)
@@ -61,64 +83,88 @@ export default function HistoryPage() {
 
   useEffect(() => { fetchHistory() }, [fetchHistory])
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this script? This action cannot be undone.')) {
-      return
-    }
-    
-    setDeletingId(id)
+  const openDeleteModal = (id: string) => {
+    setPendingDeleteId(id)
+    setIsModalOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return
+    setDeletingId(pendingDeleteId)
+    setIsModalOpen(false)
     try {
-      await api.delete(`/history/${id}`)
-      setGenerations((prev) => prev.filter((g) => g._id !== id))
-      toast.success('Deleted successfully')
+      await api.delete(`/history/${pendingDeleteId}`)
+      setGenerations((prev) => prev.filter((g) => g._id !== pendingDeleteId))
+      toast.success('Script deleted forever')
     } catch {
-      toast.error('Delete failed')
+      toast.error('Failed to delete')
     } finally {
       setDeletingId(null)
+      setPendingDeleteId(null)
     }
   }
 
-  const handlePreview = (gen: Generation) => {
-    localStorage.setItem('previewGeneration', JSON.stringify(gen))
+  const handlePreview = (group: GroupedGeneration) => {
+    localStorage.setItem('previewVersions', JSON.stringify(group.versions))
     router.push('/dashboard')
   }
 
-  const filtered = generations.filter((g) => {
-    const matchType = filterType === 'all' || g.videoType === filterType
-    const matchSearch = g.output.title.toLowerCase().includes(search.toLowerCase()) ||
-      g.topic.toLowerCase().includes(search.toLowerCase())
-    return matchType && matchSearch
-  })
+  const getGroupedData = () => {
+    const sorted = [...generations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const groups: GroupedGeneration[] = []
+
+    sorted.forEach((gen) => {
+      const group = groups.find(g => 
+        g.topic === gen.topic && 
+        Math.abs(new Date(g.createdAt).getTime() - new Date(gen.createdAt).getTime()) < 60000
+      )
+
+      if (group) {
+        group.versions.push(gen)
+      } else {
+        groups.push({
+          id: gen._id,
+          topic: gen.topic,
+          videoType: gen.videoType,
+          createdAt: gen.createdAt,
+          versions: [gen]
+        })
+      }
+    })
+
+    return groups.filter((g) => {
+      const matchType = filterType === 'all' || g.videoType === filterType
+      const matchSearch = g.topic.toLowerCase().includes(search.toLowerCase()) || 
+                          g.versions.some(v => v.output.title.toLowerCase().includes(search.toLowerCase()))
+      return matchType && matchSearch
+    })
+  }
+
+  const groupedData = getGroupedData()
 
   return (
     <main className="min-h-screen relative">
-      {/* Ambient dot bg */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
       <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold tracking-[-0.04em] text-on-surface mb-1">Generation History</h1>
-          <p className="text-on-surface-variant text-sm">All your previously generated video scripts and scene breakdowns.</p>
+          <p className="text-on-surface-variant text-sm">Manage your multi-version video scripts.</p>
         </div>
 
-        {/* Action Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Search */}
             <div className="relative">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl" />
               <input
                 type="text" value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search history..."
-                className="bg-surface-container-high text-on-surface border border-outline-variant/15 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-dim focus:border-primary-dim transition-all w-56 placeholder:text-on-surface-variant/50"
+                className="bg-surface-container-high text-on-surface border border-outline-variant/15 rounded-xl pl-10 pr-4 py-2.5 text-sm w-56 focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
-            {/* Filter */}
             <select
               value={filterType} onChange={(e) => setFilterType(e.target.value)}
-              className="bg-surface-container-high text-on-surface border border-outline-variant/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-dim appearance-none"
+              className="bg-surface-container-high text-on-surface border border-outline-variant/15 rounded-xl px-3 py-2.5 text-sm appearance-none outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="all">All Types</option>
               <option value="marketing">Marketing</option>
@@ -127,143 +173,85 @@ export default function HistoryPage() {
               <option value="explainer">Explainer</option>
             </select>
           </div>
-          <div className="text-sm text-on-surface-variant">
-            {loading ? 'Loading...' : `${filtered.length} project${filtered.length !== 1 ? 's' : ''}`}
+          <div className="text-sm text-on-surface-variant font-medium">
+            {loading ? 'Loading...' : `${groupedData.length} total projects`}
           </div>
         </div>
 
-        {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <FiLoader className="text-primary text-4xl animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
+          <div className="flex items-center justify-center py-20"><FiLoader className="text-primary text-4xl animate-spin" /></div>
+        ) : groupedData.length === 0 ? (
           <div className="text-center py-20">
             <FiVideo className="text-on-surface-variant text-6xl block mx-auto mb-4" />
             <p className="text-on-surface-variant text-lg font-medium">No generations found</p>
-            <p className="text-on-surface-variant/60 text-sm mt-1">
-              {search || filterType !== 'all' ? 'Try adjusting your search or filter' : 'Go generate your first video script!'}
-            </p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="mt-6 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-2.5 px-6 rounded-xl text-sm hover:opacity-90 transition-opacity"
-            >
-              Create New Video
-            </button>
+            <button onClick={() => router.push('/dashboard')} className="mt-6 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-2.5 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition-opacity">Create New Video</button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {filtered.map((gen, index) => {
-              const isExpanded = expandedId === gen._id
-              const isFirst = index === 0
-              const badgeClass = TYPE_BADGE[gen.videoType] || 'bg-surface-container-high text-on-surface-variant'
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {groupedData.map((group) => {
+              const vIdx = activeVersions[group.id] || 0
+              const currentGen = group.versions[vIdx]
+              const badgeClass = TYPE_BADGE[group.videoType] || 'bg-surface-container-high text-on-surface-variant'
 
               return (
-                <div
-                  key={gen._id}
-                  className={`${isFirst && filtered.length > 2 ? 'lg:col-span-2' : ''} bg-surface-container-low rounded-3xl border border-outline-variant/15 shadow-[0_24px_48px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col relative group hover:border-outline-variant/40 transition-colors duration-300`}
-                >
-                  {/* Hover glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
+                <div key={group.id} className="bg-surface-container-low rounded-3xl border border-outline-variant/15 shadow-xl overflow-hidden flex flex-col relative group hover:border-outline-variant/40 transition-all duration-300">
                   <div className="p-6 flex-1">
-                    <div className={`flex ${isFirst && filtered.length > 2 ? 'flex-col md:flex-row gap-6' : 'flex-col gap-4'}`}>
-                      {/* Main info */}
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex justify-between items-start mb-3">
-                          <span className={`${badgeClass} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}>
-                            {gen.videoType.replace('_', ' ')}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`${badgeClass} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}>
+                          {group.videoType.replace('_', ' ')}
+                        </span>
+                        {group.versions.length > 1 && (
+                          <span className="bg-primary/10 text-primary px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 border border-primary/20">
+                            <FiLayers /> {group.versions.length} Versions
                           </span>
-                          <div className="flex items-center gap-1.5 text-on-surface-variant text-xs">
-                            <FiClock className="text-lg" />
-                            {timeAgo(gen.createdAt)}
-                          </div>
-                        </div>
-                        <h2 className={`font-bold font-headline text-on-surface group-hover:text-primary transition-colors duration-300 mb-2 ${isFirst ? 'text-2xl' : 'text-xl'}`}>
-                          {gen.output.title}
-                        </h2>
-                        <p className="text-on-surface-variant text-sm line-clamp-2 flex-1 leading-relaxed mb-4">{gen.topic}</p>
-
-                        {/* Keywords */}
-                        {gen.keywords.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {gen.keywords.slice(0, 4).map((kw) => (
-                              <span key={kw} className="bg-surface-container-highest border border-outline-variant/20 px-2.5 py-1 rounded-lg text-xs text-on-surface-variant">
-                                {kw}
-                              </span>
-                            ))}
-                          </div>
                         )}
                       </div>
+                      <div className="flex items-center gap-1.5 text-on-surface-variant text-[11px] font-medium">
+                        <FiClock /> {timeAgo(group.createdAt)}
+                      </div>
+                    </div>
 
-                      {/* Scene preview (featured card only) */}
-                      {isFirst && filtered.length > 2 && (
-                        <div className="md:w-80 flex-shrink-0 bg-surface-container-highest rounded-xl border border-outline-variant/15 p-5 relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-primary-dim/10 blur-3xl rounded-full pointer-events-none" />
-                          <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
-                            <FiList className="text-primary text-lg" />
-                            Scene Breakdown
-                          </h3>
-                          <div className="space-y-2">
-                            {gen.output.scenes.slice(0, 2).map((scene) => (
-                              <div key={scene.sceneNumber} className={`bg-surface-container-low rounded-lg p-2.5 border-t border-r border-b border-outline-variant/10 ${scene.sceneNumber === 1 ? 'border-l-2 border-l-primary' : ''}`}>
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className={`text-xs font-bold ${scene.sceneNumber === 1 ? 'text-primary' : 'text-on-surface'}`}>Scene {scene.sceneNumber}</span>
-                                  <span className="text-[10px] text-on-surface-variant bg-surface px-1.5 py-0.5 rounded">{scene.timeRange}</span>
-                                </div>
-                                <p className="text-xs text-on-surface-variant line-clamp-2">{scene.visual}</p>
-                              </div>
-                            ))}
-                            {gen.output.scenes.length > 2 && (
-                              <button
-                                onClick={() => setExpandedId(isExpanded ? null : gen._id)}
-                                className="w-full text-center text-xs text-primary font-medium py-2 opacity-70 hover:opacity-100 transition-opacity"
-                              >
-                                View {gen.output.scenes.length - 2} more scenes
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                    <h2 className="font-bold text-xl text-on-surface mb-2 group-hover:text-primary transition-colors leading-tight">
+                      {currentGen.output.title}
+                    </h2>
+                    <p className="text-on-surface-variant text-sm line-clamp-2 mb-4 leading-relaxed">{group.topic}</p>
+
+                    {group.versions.length > 1 && (
+                      <div className="flex gap-1 mb-4 bg-surface-container-highest/50 p-1 rounded-xl w-fit border border-outline-variant/10">
+                        {group.versions.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setActiveVersions(prev => ({ ...prev, [group.id]: i }))}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${vIdx === i ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high'}`}
+                          >
+                            V{i + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="bg-surface-container-highest/30 rounded-2xl p-4 border border-outline-variant/10 backdrop-blur-sm">
+                      <h3 className="text-[10px] font-bold text-primary uppercase mb-2 flex items-center gap-2 tracking-widest">
+                        <FiList /> Scene Preview
+                      </h3>
+                      <p className="text-xs text-on-surface-variant line-clamp-2 italic leading-relaxed">"{currentGen.output.scenes[0]?.script}"</p>
                     </div>
                   </div>
 
-                  {/* Expanded scenes */}
-                  {isExpanded && (
-                    <div className="px-6 pb-4 space-y-2">
-                      {gen.output.scenes.slice(2).map((scene) => (
-                        <div key={scene.sceneNumber} className="bg-surface-container-highest rounded-xl p-3 border border-outline-variant/10">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-bold text-on-surface">Scene {scene.sceneNumber}</span>
-                            <span className="text-[10px] text-on-surface-variant">{scene.timeRange}</span>
-                          </div>
-                          <p className="text-xs text-on-surface-variant">{scene.visual}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Footer Actions */}
-                  <div className="bg-surface-container-highest/60 px-6 py-3 border-t border-outline-variant/15 flex justify-between items-center">
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="text-on-surface-variant text-xs">{gen.output.scenes.length} scenes · {gen.duration}</span>
-                      <button
-                        onClick={() => handlePreview(gen)}
-                        className="flex items-center gap-1.5 text-on-surface hover:text-primary transition-colors font-medium"
-                      >
-                        <FiPlayCircle className="text-xl" />
-                        Preview & Export
-                      </button>
-                    </div>
+                  <div className="bg-surface-container-highest/40 px-6 py-4 border-t border-outline-variant/15 flex justify-between items-center backdrop-blur-md">
                     <button
-                      onClick={() => handleDelete(gen._id)}
-                      disabled={deletingId === gen._id}
-                      className="text-error-dim hover:text-error transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-error-container/10 disabled:opacity-50"
+                      onClick={() => handlePreview(group)}
+                      className="flex items-center gap-2 text-on-surface hover:text-primary transition-colors font-bold text-sm"
                     >
-                      {deletingId === gen._id
-                        ? <FiLoader className="text-xl animate-spin" />
-                        : <FiTrash2 className="text-xl" />
-                      }
+                      <FiPlayCircle className="text-xl" /> Preview & Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteModal(currentGen._id)}
+                      disabled={deletingId === currentGen._id}
+                      className="text-error-dim hover:text-error p-2 rounded-xl hover:bg-error/10 transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === currentGen._id ? <FiLoader className="animate-spin text-lg" /> : <FiTrash2 className="text-lg" />}
                     </button>
                   </div>
                 </div>
@@ -272,6 +260,26 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-[fade-in_0.2s_ease]">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative w-full max-w-sm bg-surface-container-low rounded-3xl border border-error/20 shadow-[0_24px_48px_rgba(0,0,0,0.5),0_0_40px_rgba(255,110,132,0.05)] overflow-hidden animate-[scale-in_0.2s_ease]">
+            <div className="p-6 sm:p-8">
+              <div className="w-14 h-14 rounded-2xl bg-error/10 flex items-center justify-center mb-6 border border-error/20">
+                <FiAlertTriangle className="text-error text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-on-surface mb-2">Delete Script?</h3>
+              <p className="text-on-surface-variant text-sm leading-relaxed mb-8">This action is permanent and cannot be undone.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-3 rounded-xl bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-variant transition-colors">Cancel</button>
+                <button onClick={confirmDelete} className="flex-1 px-6 py-3 rounded-xl bg-error text-on-error font-bold text-sm hover:opacity-90 shadow-lg shadow-error/20 transition-all active:scale-[0.98]">Yes, Delete</button>
+              </div>
+            </div>
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface transition-colors"><FiX className="text-xl" /></button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
