@@ -123,7 +123,16 @@ export default function DashboardPage() {
   }
 
   const copyScript = (res: Generation) => {
-    navigator.clipboard.writeText(res.output.fullScript); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000)
+    let c = `TITLE: ${res.output.title}\n\nSCENE BREAKDOWN\n\n`
+    res.output.scenes.forEach(s => { 
+      c += `SCENE ${s.sceneNumber} (${s.timeRange})\nVISUAL: ${s.visual}\nAUDIO: "${s.script}"\n\n` 
+    })
+    c += `FULL SCRIPT\n\n${res.output.fullScript}`
+    
+    navigator.clipboard.writeText(c)
+    setCopied(true)
+    toast.success('Script & Breakdown Copied!')
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const downloadScript = (res: Generation) => {
