@@ -143,7 +143,7 @@ export default function DashboardPage() {
     a.href = u; a.download = `${res.output.title}_v${activeTab + 1}.txt`; a.click()
   }
 
-  const isAnyLoading = loadingStates.some(s => s)
+  const isAnyLoading = loading || loadingStates.some(s => s)
 
   return (
     <main className="min-h-screen p-4 sm:p-6 lg:p-8 bg-surface bg-[radial-gradient(ellipse_at_top_right,#131319_0%,transparent_60%)]">
