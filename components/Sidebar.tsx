@@ -79,10 +79,6 @@ const SidebarContent = ({ pathname, user, handleLogout, setMobileOpen }: Sidebar
 
     {/* Footer */}
     <div className="flex flex-col gap-1 pt-4 border-t border-outline-variant/15">
-      <Link href="#" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all">
-        <FiHelpCircle className="text-xl" />
-        Support
-      </Link>
       <button
         onClick={handleLogout}
         className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-error/10 hover:text-error transition-all text-left"
