@@ -3,6 +3,16 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
+import { 
+  FiChevronDown, 
+  FiUsers, 
+  FiX, 
+  FiLoader, 
+  FiZap, 
+  FiCheck, 
+  FiCopy, 
+  FiDownload 
+} from 'react-icons/fi'
 
 const VIDEO_TYPES = [
   { value: 'marketing', label: 'Marketing Explainer' },
@@ -116,7 +126,7 @@ export default function DashboardPage() {
                       <option key={vt.value} value={vt.value}>{vt.label}</option>
                     ))}
                   </select>
-                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-xl">expand_more</span>
+                  <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-xl" />
                 </div>
               </div>
 
@@ -124,7 +134,7 @@ export default function DashboardPage() {
               <div className="mb-5">
                 <label className="block text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wider">Target Audience</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">group</span>
+                  <FiUsers className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl" />
                   <input
                     type="text" value={audience} onChange={(e) => setAudience(e.target.value)}
                     placeholder="e.g. Young Professionals, Tech Enthusiasts"
@@ -182,8 +192,8 @@ export default function DashboardPage() {
                     {keywords.map((kw) => (
                       <span key={kw} className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                         {kw}
-                        <button onClick={() => removeKeyword(kw)} className="hover:text-primary-dim ml-1">
-                          <span className="material-symbols-outlined text-sm">close</span>
+                        <button onClick={() => removeKeyword(kw)} className="hover:text-primary-dim ml-1 flex items-center">
+                          <FiX className="text-sm" />
                         </button>
                       </span>
                     ))}
@@ -223,12 +233,12 @@ export default function DashboardPage() {
               >
                 {loading ? (
                   <>
-                    <span className="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
+                    <FiLoader className="text-2xl animate-spin" />
                     <span className="text-base">Generating Script...</span>
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>magic_button</span>
+                    <FiZap className="text-2xl fill-current" />
                     <span className="text-base">Generate Script & Scenes</span>
                   </>
                 )}
@@ -259,14 +269,14 @@ export default function DashboardPage() {
                     onClick={copyScript}
                     className="bg-surface-container-highest text-on-surface border border-outline-variant/15 rounded-xl py-2 px-3 text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2"
                   >
-                    <span className="material-symbols-outlined text-lg">{copied ? 'check' : 'content_copy'}</span>
+                    {copied ? <FiCheck className="text-lg" /> : <FiCopy className="text-lg" />}
                     <span className="hidden sm:inline">Copy</span>
                   </button>
                   <button
                     onClick={downloadScript}
                     className="bg-surface-container-highest text-on-surface border border-outline-variant/15 rounded-xl py-2 px-3 text-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2"
                   >
-                    <span className="material-symbols-outlined text-lg">download</span>
+                    <FiDownload className="text-lg" />
                     <span className="hidden sm:inline">.txt</span>
                   </button>
                 </div>
@@ -305,7 +315,7 @@ export default function DashboardPage() {
                 className="w-full flex items-center justify-between p-4 text-on-surface hover:bg-surface-container-highest transition-colors"
               >
                 <span className="font-bold text-sm">View Full Script</span>
-                <span className={`material-symbols-outlined text-on-surface-variant transition-transform ${scriptOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                <FiChevronDown className={`text-on-surface-variant transition-transform ${scriptOpen ? 'rotate-180' : ''}`} />
               </button>
               {scriptOpen && (
                 <div className="px-4 pb-4">

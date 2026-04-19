@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
+import { FiSearch, FiLoader, FiVideo, FiClock, FiList, FiPlayCircle, FiTrash2 } from 'react-icons/fi'
 
 interface Scene { sceneNumber: number; timeRange: string; visual: string; script: string }
 interface Generation {
@@ -97,7 +98,7 @@ export default function HistoryPage() {
           <div className="flex items-center gap-2 flex-wrap">
             {/* Search */}
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl" />
               <input
                 type="text" value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search history..."
@@ -124,11 +125,11 @@ export default function HistoryPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <span className="material-symbols-outlined text-primary text-4xl animate-spin">progress_activity</span>
+            <FiLoader className="text-primary text-4xl animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <span className="material-symbols-outlined text-on-surface-variant text-6xl block mb-4">movie_filter</span>
+            <FiVideo className="text-on-surface-variant text-6xl block mx-auto mb-4" />
             <p className="text-on-surface-variant text-lg font-medium">No generations found</p>
             <p className="text-on-surface-variant/60 text-sm mt-1">
               {search || filterType !== 'all' ? 'Try adjusting your search or filter' : 'Go generate your first video script!'}
@@ -164,7 +165,7 @@ export default function HistoryPage() {
                             {gen.videoType.replace('_', ' ')}
                           </span>
                           <div className="flex items-center gap-1.5 text-on-surface-variant text-xs">
-                            <span className="material-symbols-outlined text-lg">schedule</span>
+                            <FiClock className="text-lg" />
                             {timeAgo(gen.createdAt)}
                           </div>
                         </div>
@@ -190,7 +191,7 @@ export default function HistoryPage() {
                         <div className="md:w-80 flex-shrink-0 bg-surface-container-highest rounded-xl border border-outline-variant/15 p-5 relative overflow-hidden">
                           <div className="absolute top-0 right-0 w-24 h-24 bg-primary-dim/10 blur-3xl rounded-full pointer-events-none" />
                           <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary text-lg">view_timeline</span>
+                            <FiList className="text-primary text-lg" />
                             Scene Breakdown
                           </h3>
                           <div className="space-y-2">
@@ -240,7 +241,7 @@ export default function HistoryPage() {
                         onClick={() => setExpandedId(isExpanded ? null : gen._id)}
                         className="flex items-center gap-1.5 text-on-surface hover:text-primary transition-colors font-medium"
                       >
-                        <span className="material-symbols-outlined text-xl">play_circle</span>
+                        <FiPlayCircle className="text-xl" />
                         Preview
                       </button>
                     </div>
@@ -250,8 +251,8 @@ export default function HistoryPage() {
                       className="text-error-dim hover:text-error transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-error-container/10 disabled:opacity-50"
                     >
                       {deletingId === gen._id
-                        ? <span className="material-symbols-outlined text-xl animate-spin">progress_activity</span>
-                        : <span className="material-symbols-outlined text-xl">delete</span>
+                        ? <FiLoader className="text-xl animate-spin" />
+                        : <FiTrash2 className="text-xl" />
                       }
                     </button>
                   </div>

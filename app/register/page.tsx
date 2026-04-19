@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
+import { FiPlay, FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiLoader } from 'react-icons/fi'
 
 const getPasswordStrength = (password: string) => {
   if (password.length === 0) return { label: '', color: '', width: '0%' }
@@ -73,7 +74,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8 justify-center">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-[0_0_15px_rgba(189,157,255,0.3)]">
-            <span className="material-symbols-outlined text-on-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+            <FiPlay className="text-on-primary text-xl fill-current" />
           </div>
           <span className="text-2xl font-black tracking-tighter text-gradient-primary">AIVidGen</span>
         </div>
@@ -88,7 +89,7 @@ export default function RegisterPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-on-surface-variant ml-1">Full Name</label>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">person</span>
+              <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" />
               <input
                 type="text" value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
@@ -101,7 +102,7 @@ export default function RegisterPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-on-surface-variant ml-1">Email</label>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">mail</span>
+              <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" />
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="john@example.com"
@@ -114,7 +115,7 @@ export default function RegisterPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-on-surface-variant ml-1">Password</label>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">lock</span>
+              <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" />
               <input
                 type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -122,7 +123,7 @@ export default function RegisterPage() {
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
-                <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                {showPassword ? <FiEye className="text-xl" /> : <FiEyeOff className="text-xl" />}
               </button>
             </div>
             {/* Strength bar */}
@@ -140,7 +141,7 @@ export default function RegisterPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-on-surface-variant ml-1">Confirm Password</label>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">lock</span>
+              <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl" />
               <input
                 type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
@@ -167,7 +168,7 @@ export default function RegisterPage() {
             type="submit" disabled={loading}
             className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold text-sm tracking-wide shadow-primary-glow hover:shadow-[0_6px_25px_rgba(189,157,255,0.35)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading && <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>}
+            {loading && <FiLoader className="text-lg animate-spin" />}
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
