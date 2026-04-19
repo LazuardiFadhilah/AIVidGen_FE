@@ -1,26 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Theme: Aether Flux Design System ───────────────────────────────────────── */
+@theme {
+  /* Colors */
+  --color-primary: #bd9dff;
+  --color-primary-dim: #8a4cfc;
+  --color-primary-fixed: #b28cff;
+  --color-primary-fixed-dim: #a67aff;
+  --color-primary-container: #b28cff;
+  --color-on-primary: #3c0089;
+  --color-on-primary-fixed: #000000;
+  --color-on-primary-fixed-variant: #390083;
+  --color-on-primary-container: #2e006c;
+  --color-inverse-primary: #742fe5;
+
+  --color-secondary: #9492ff;
+  --color-secondary-dim: #645efb;
+  --color-secondary-fixed: #cfcdff;
+  --color-secondary-fixed-dim: #c0bdff;
+  --color-secondary-container: #3323cc;
+  --color-on-secondary: #120076;
+  --color-on-secondary-fixed: #2000b0;
+  --color-on-secondary-fixed-variant: #3e32d5;
+  --color-on-secondary-container: #cecbff;
+
+  --color-tertiary: #ff97b2;
+  --color-tertiary-dim: #f17799;
+  --color-tertiary-fixed: #ff8eac;
+  --color-tertiary-fixed-dim: #f77c9e;
+  --color-tertiary-container: #fe81a4;
+  --color-on-tertiary: #6a0a31;
+  --color-on-tertiary-fixed: #380016;
+  --color-on-tertiary-fixed-variant: #711036;
+  --color-on-tertiary-container: #5a0027;
+
+  --color-surface: #0e0e13;
+  --color-surface-dim: #0e0e13;
+  --color-surface-bright: #2c2b33;
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #131319;
+  --color-surface-container: #19191f;
+  --color-surface-container-high: #1f1f26;
+  --color-surface-container-highest: #25252d;
+  --color-surface-variant: #25252d;
+  --color-surface-tint: #bd9dff;
+  --color-on-surface: #f9f5fd;
+  --color-on-surface-variant: #acaab1;
+  --color-inverse-surface: #fcf8ff;
+  --color-inverse-on-surface: #55545b;
+
+  --color-background: #0e0e13;
+  --color-on-background: #f9f5fd;
+
+  --color-outline: #76747b;
+  --color-outline-variant: #48474d;
+
+  --color-error: #ff6e84;
+  --color-error-dim: #d73357;
+  --color-error-container: #a70138;
+  --color-on-error: #490013;
+  --color-on-error-container: #ffb2b9;
+
+  /* Typography */
+  --font-sans: 'Inter', sans-serif;
+  --font-headline: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-label: 'Inter', sans-serif;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Base styles ─────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  *::selection {
+    background-color: var(--color-primary-dim);
+    color: var(--color-on-primary);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Utility classes ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  .bg-grid {
+    background-size: 24px 24px;
+  }
+  .glass-panel {
+    background: rgba(25, 25, 31, 0.8);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+  .glass-overlay {
+    background: rgba(37, 37, 45, 0.6);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+  .shadow-ambient {
+    box-shadow: 0px 24px 48px rgba(0,0,0,0.4), 0px 0px 20px rgba(189,157,255,0.08);
+  }
+  .shadow-primary-glow {
+    box-shadow: 0 4px 20px rgba(189,157,255,0.25);
+  }
+  .text-gradient-primary {
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-image: linear-gradient(135deg, #bd9dff, #8a4cfc);
+  }
+}
+
+/* ── Material Symbols ─────────────────────────────────────────────────────────── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
