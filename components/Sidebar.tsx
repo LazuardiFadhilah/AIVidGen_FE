@@ -18,7 +18,6 @@ import {
 const navItems = [
   { href: '/dashboard', icon: FiVideo, label: 'Generate' },
   { href: '/history', icon: FiClock, label: 'History' },
-  { href: '/settings', icon: FiSettings, label: 'Settings' },
 ]
 
 interface User { name: string; email: string }
@@ -43,15 +42,17 @@ const SidebarContent = ({ pathname, user, handleLogout, setMobileOpen }: Sidebar
       </div>
     </div>
 
-    {/* New Project CTA */}
-    <Link
-      href="/dashboard"
-      className="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(189,157,255,0.15)] text-sm"
-      onClick={() => setMobileOpen(false)}
-    >
-      <FiPlus className="text-lg" />
-      Create New Video
-    </Link>
+    {/* New Project CTA - Hidden on Dashboard to avoid redundancy */}
+    {pathname !== '/dashboard' && (
+      <Link
+        href="/dashboard"
+        className="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(189,157,255,0.15)] text-sm"
+        onClick={() => setMobileOpen(false)}
+      >
+        <FiPlus className="text-lg" />
+        Create New Video
+      </Link>
+    )}
 
     {/* Nav */}
     <nav className="flex-1 flex flex-col gap-1">

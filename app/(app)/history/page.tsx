@@ -14,6 +14,7 @@ interface Generation {
   keywords: string[]
   tone: string
   duration: string
+  audience?: string
   createdAt: string
   output: { title: string; fullScript: string; scenes: Scene[] }
 }
@@ -71,6 +72,11 @@ export default function HistoryPage() {
     } finally {
       setDeletingId(null)
     }
+  }
+
+  const handlePreview = (gen: Generation) => {
+    localStorage.setItem('previewGeneration', JSON.stringify(gen))
+    router.push('/dashboard')
   }
 
   const filtered = generations.filter((g) => {
@@ -238,11 +244,11 @@ export default function HistoryPage() {
                     <div className="flex items-center gap-3 text-sm">
                       <span className="text-on-surface-variant text-xs">{gen.output.scenes.length} scenes · {gen.duration}</span>
                       <button
-                        onClick={() => setExpandedId(isExpanded ? null : gen._id)}
+                        onClick={() => handlePreview(gen)}
                         className="flex items-center gap-1.5 text-on-surface hover:text-primary transition-colors font-medium"
                       >
                         <FiPlayCircle className="text-xl" />
-                        Preview
+                        Preview & Export
                       </button>
                     </div>
                     <button

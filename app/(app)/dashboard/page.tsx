@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import api from '@/lib/api'
 import { 
@@ -11,7 +11,8 @@ import {
   FiZap, 
   FiCheck, 
   FiCopy, 
-  FiDownload 
+  FiDownload,
+  FiSave
 } from 'react-icons/fi'
 
 const VIDEO_TYPES = [
@@ -32,7 +33,7 @@ const DURATIONS = ['15s', '30s', '60s', '90s']
 
 interface Scene { sceneNumber: number; timeRange: string; visual: string; script: string }
 interface GenerationOutput { title: string; fullScript: string; scenes: Scene[] }
-interface Generation { _id: string; videoType: string; duration: string; output: GenerationOutput }
+interface Generation { _id: string; videoType: string; topic: string; audience?: string; tone: string; duration: string; keywords: string[]; output: GenerationOutput }
 
 export default function DashboardPage() {
   const [videoType, setVideoType] = useState('marketing')
@@ -44,8 +45,30 @@ export default function DashboardPage() {
   const [keywords, setKeywords] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Generation | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [scriptOpen, setScriptOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    const preview = localStorage.getItem('previewGeneration')
+    if (preview) {
+      try {
+        const gen = JSON.parse(preview)
+        setResult(gen)
+        setEditingId(gen._id)
+        setVideoType(gen.videoType)
+        setTopic(gen.topic)
+        setAudience(gen.audience || '')
+        setTone(gen.tone)
+        setDuration(gen.duration)
+        setKeywords(gen.keywords || [])
+        localStorage.removeItem('previewGeneration')
+        toast.success('Ready to edit!')
+      } catch (e) {
+        console.error('Failed to load preview generation', e)
+      }
+    }
+  }, [])
 
   const addKeyword = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && keywordInput.trim()) {
@@ -63,16 +86,29 @@ export default function DashboardPage() {
     if (!topic.trim()) { toast.error('Please enter a topic'); return }
     setLoading(true)
     setResult(null)
+    
+    const payload = { videoType, topic, audience, tone, duration, keywords }
+    
     try {
-      const { data } = await api.post('/generate', { videoType, topic, audience, tone, duration, keywords })
+      let data;
+      if (editingId) {
+        // Mode Edit: Update data yang sudah ada
+        const response = await api.put(`/history/${editingId}`, payload)
+        data = response.data
+        toast.success('Script updated!')
+      } else {
+        // Mode Create: Generate baru
+        const response = await api.post('/generate', payload)
+        data = response.data
+        toast.success('Script generated!')
+      }
       setResult(data.generation)
-      toast.success('Script generated!')
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : undefined
-      toast.error(msg || 'Generation failed')
+      toast.error(msg || (editingId ? 'Update failed' : 'Generation failed'))
     } finally {
       setLoading(false)
     }
@@ -88,7 +124,29 @@ export default function DashboardPage() {
 
   const downloadScript = () => {
     if (!result) return
-    const blob = new Blob([result.output.fullScript], { type: 'text/plain' })
+    
+    // Format the content
+    let content = `TITLE: ${result.output.title}\n`
+    content += `VIDEO TYPE: ${result.videoType.toUpperCase()}\n`
+    content += `DURATION: ${result.duration}\n`
+    content += `TONE: ${result.tone.toUpperCase()}\n`
+    content += `\n-------------------------------------------\n`
+    content += `SCENE BREAKDOWN\n`
+    content += `-------------------------------------------\n\n`
+    
+    result.output.scenes.forEach(scene => {
+      content += `SCENE ${String(scene.sceneNumber).padStart(2, '0')} (${scene.timeRange})\n`
+      content += `VISUAL: ${scene.visual}\n`
+      content += `AUDIO: "${scene.script}"\n`
+      content += `\n`
+    })
+    
+    content += `-------------------------------------------\n`
+    content += `FULL SCRIPT\n`
+    content += `-------------------------------------------\n\n`
+    content += result.output.fullScript
+
+    const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -101,9 +159,28 @@ export default function DashboardPage() {
     <main className="min-h-screen p-4 sm:p-6 lg:p-8 bg-surface bg-[radial-gradient(ellipse_at_top_right,#131319_0%,transparent_60%)]">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <header>
-          <h1 className="text-3xl lg:text-4xl font-bold text-on-surface tracking-[-0.04em] mb-1">Generate Video Script</h1>
-          <p className="text-on-surface-variant text-sm">Describe your video and let AI do the rest.</p>
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl lg:text-4xl font-bold text-on-surface tracking-[-0.04em] mb-1">
+              {editingId ? 'Edit Video Script' : 'Generate Video Script'}
+            </h1>
+            <p className="text-on-surface-variant text-sm">
+              {editingId ? 'Refine your inputs to update the existing script.' : 'Describe your video and let AI do the rest.'}
+            </p>
+          </div>
+          {editingId && (
+            <button 
+              onClick={() => {
+                setEditingId(null)
+                setResult(null)
+                setTopic('')
+                setKeywords([])
+              }}
+              className="text-xs font-bold text-primary hover:underline"
+            >
+              + Create New Instead
+            </button>
+          )}
         </header>
 
         {/* Form Grid */}
@@ -225,21 +302,23 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Generate Button */}
+              {/* Generate/Update Button */}
               <button
                 onClick={handleGenerate}
                 disabled={loading}
-                className="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 hover:opacity-90 transition-opacity shadow-[0px_0px_20px_rgba(189,157,255,0.2)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`w-full ${editingId ? 'bg-gradient-to-br from-secondary to-secondary-dim' : 'bg-gradient-to-br from-primary to-primary-dim'} text-on-primary font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 hover:opacity-90 transition-opacity shadow-[0px_0px_20px_rgba(189,157,255,0.2)] disabled:opacity-60 disabled:cursor-not-allowed`}
               >
                 {loading ? (
                   <>
                     <FiLoader className="text-2xl animate-spin" />
-                    <span className="text-base">Generating Script...</span>
+                    <span className="text-base">{editingId ? 'Updating...' : 'Generating...'}</span>
                   </>
                 ) : (
                   <>
-                    <FiZap className="text-2xl fill-current" />
-                    <span className="text-base">Generate Script & Scenes</span>
+                    {editingId ? <FiSave className="text-2xl" /> : <FiZap className="text-2xl fill-current" />}
+                    <span className="text-base">
+                      {editingId ? 'Update & Regenerate Script' : 'Generate Script & Scenes'}
+                    </span>
                   </>
                 )}
               </button>
