@@ -11,25 +11,27 @@
 
 ## ✨ Fitur Utama
 
-- **🤖 AI-Powered Script Generation**: Algoritma cerdas yang menyesuaikan naskah berdasarkan tipe video, audiens, dan tone suara.
+- **🤖 AI-Powered Script Generation**: Algoritma cerdas yang menyesuaikan naskah berdasarkan tipe video, audiens, dan tone suara menggunakan **OpenAI GPT-4o**.
+- **⚡ Fast & Creative Modes**:
+    - **Fast Mode**: Menghasilkan 1 versi script secara instan.
+    - **Creative Mode**: Menghasilkan **3 variasi script sekaligus** untuk memberikan lebih banyak opsi kreatif.
 - **📑 Scene Breakdown**: Setiap naskah dilengkapi dengan arahan visual dan naskah audio per adegan lengkap dengan estimasi durasi.
-- **🔄 Live Editing & Update**: Fitur "Preview & Export" yang memungkinkan Anda menarik kembali naskah dari histori untuk direvisi dan di-generate ulang.
+- **🔄 Smart Update**: Kemampuan untuk mengedit parameter input dan melakukan *re-generate* script yang sudah ada langsung dari dashboard.
 - **📥 Multi-Format Export**:
+    - **Enhanced Copy**: Menyalin seluruh detail naskah (Judul, Scene Breakdown, & Full Script) dalam satu klik.
     - **Export as PDF**: Template profesional yang dioptimalkan untuk cetak.
     - **Export as TXT**: File teks terstruktur yang mencakup detail scene.
-- **🕒 Generation History**: Simpan dan kelola semua proyek naskah Anda di satu tempat.
-- **🎨 Aether Flux Design System**: Antarmuka modern yang futuristik dengan mode gelap (*dark mode*) yang nyaman di mata.
+- **🕒 Generation History**: Simpan, cari, dan kelola semua proyek naskah Anda di satu tempat.
 
 ---
 
 ## 🚀 Teknologi yang Digunakan
 
 - **Frontend**: [Next.js](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) dengan custom theme "Aether Flux".
-- **Icons**: [React Icons](https://react-icons.github.io/react-icons/) (Feather Icons set).
-- **State Management**: React Hooks (useState, useEffect, useCallback).
-- **Notifications**: [React Hot Toast](https://react-hot-toast.com/).
-- **API Client**: Axios untuk koneksi ke backend AI service.
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) dengan custom theme futuristik.
+- **AI Integration**: Koneksi aman ke OpenAI API melalui Backend khusus.
+- **Notifications**: [React Hot Toast](https://react-hot-toast.com/) untuk feedback real-time.
+- **API Client**: Axios dengan interceptor untuk manajemen keamanan JWT.
 
 ---
 
@@ -49,7 +51,7 @@
 3. **Konfigurasi Environment**:
    Buat file `.env.local` dan tambahkan URL API backend Anda:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   NEXT_PUBLIC_API_URL=https://aividgen-be.vercel.app/api
    ```
 
 4. **Jalankan Aplikasi**:
@@ -67,34 +69,22 @@
 │   ├── (app)/         # Protected Routes (Dashboard, History)
 │   ├── login/         # Authentication Page
 │   └── register/      # Registration Page
-├── components/        # Reusable UI Components (Sidebar, etc.)
-├── lib/               # Utility functions & API configuration
+├── components/        # Reusable UI Components (Sidebar, Navbar)
+├── lib/               # API configuration (Axios Interceptors)
 ├── public/            # Static assets
-└── styles/            # Global styles & Tailwind config
+└── types/             # TypeScript definitions
 ```
 
 ---
 
 ## 📝 Alur Kerja Pengguna (User Workflow)
 
-1. **Register/Login**: Masuk menggunakan akun lokal (Database-driven).
-2. **Setup Prompt**: Pilih tipe video (Marketing, Edukasi, dll), masukkan topik, target audiens, dan tone.
-3. **Generate**: AI akan memproses naskah dan menampilkan breakdown scene di layar.
-4. **Manage History**: Akses histori untuk melihat naskah lama.
-5. **Re-edit**: Gunakan tombol "Preview & Export" di histori untuk memodifikasi naskah lama di dashboard.
-6. **Export**: Unduh hasil akhir dalam format PDF yang rapi atau file teks mentah.
-
----
-
-## 🤝 Kontribusi
-
-Kontribusi selalu terbuka! Silakan fork repositori ini dan buat pull request jika ingin menambahkan fitur baru atau memperbaiki bug.
-
----
-
-## 📄 Lisensi
-
-Proyek ini berada di bawah lisensi MIT.
+1. **Authentication**: Register dan Login untuk masuk ke workspace personal.
+2. **Setup Project**: Masukkan topik, pilih tipe video, tentukan audiens, dan tambahkan keywords.
+3. **Choose Mode**: Pilih **Fast Mode** (1 versi) atau **Creative Mode** (3 variasi).
+4. **Review Storyboard**: Lihat breakdown visual dan audio per adegan.
+5. **Manage & Update**: Akses histori untuk mengedit atau memperbarui naskah lama dengan parameter baru.
+6. **Export & Share**: Salin script lengkap atau unduh dalam format TXT/PDF.
 
 ---
 
